@@ -32,6 +32,13 @@ jobs:
           echo "FRONTEND_PORT=${{ secrets.FRONTEND_PORT }}" >> .env
 
       - name: Build Docker Compose services
-        run: docker compose -f docker-compose.yml build
-        continue-on-error: false
+        run: docker compose -f docker-compose.yml up --build -d
+
+      - name: Wait for services to be ready
+        run: |
+          echo "Waiting for backend to respond"
+          for i in {1..10}; do
+            curl --fail http://localhost:${{ secrets.BACKEND_PORT }}/ || sleep 3
+          done
+
 
